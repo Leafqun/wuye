@@ -1,0 +1,74 @@
+#spring的数据库连接池配置，以及开发工具配置（热更新)
+spring:
+  profiles:
+    active: prod
+
+  ssh:
+      host: 119.23.22.99
+      user: root
+      pwd: Leafqun@yeah.net
+      port: 22
+      local_port: 3307
+      remote_host: localhost
+      remote_port: 3306
+
+  redis:
+    database: 0
+    host: localhost
+    port: 6379
+    password:
+    timeout: 2000s
+
+  devtools:
+    restart:
+      enabled: true
+
+mybatis-plus:
+  # 扫描 mapper.xml
+  mapper-locations: classpath:/mapper/**/*Mapper.xml
+  configuration:
+    jdbc-type-for-null: 'null'
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+#日志文件配置（取名logback-spring.xml，可忽略该配置）
+logging:
+  config: classpath:logback-spring.xml
+server:
+  port: 9999
+---
+# 开发环境配置
+spring:
+  profiles: dev
+  datasource:
+    driver-class-name: com.p6spy.engine.spy.P6SpyDriver
+    url: jdbc:p6spy:mysql//localhost:3307/wuye?characterEncoding=UTF-8&useUnicode=true&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password:
+
+---
+# 测试环境配置
+spring:
+  profiles: test
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/wuye?characterEncoding=UTF-8&useUnicode=true&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password:
+    hikari:
+      maxLifetime: 1765000 #一个连接的生命时长（毫秒），超时而且没被使用则被释放（retired），缺省:30分钟，建议设置比数据库超时时长少30秒以上
+      maximumPoolSize: 15 #连接池中允许的最大连接数。缺省值：10；推荐的公式：((core_count * 2) + effective_spindle_count)
+
+
+---
+# 生产环境配置
+spring:
+  profiles: prod
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3307/wuye?characterEncoding=UTF-8&useUnicode=true&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password:
+    hikari:
+      maxLifetime: 1765000 #一个连接的生命时长（毫秒），超时而且没被使用则被释放（retired），缺省:30分钟，建议设置比数据库超时时长少30秒以上
+      maximumPoolSize: 15 #连接池中允许的最大连接数。缺省值：10；推荐的公式：((core_count * 2) + effective_spindle_count)
+
