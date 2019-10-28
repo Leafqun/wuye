@@ -5,7 +5,11 @@ public enum ErrorEnum {
     NOT_EXCEL("6", "上传文件不是excel文件"),
 
     //
-    EMPTY_EXCEL("6", "excel文件不能为空");
+    EMPTY_EXCEL("6", "excel文件不能为空"),
+
+    EMPTY_PARAM("1", "请求参数为空"),
+
+    INCOMPLETE_PARAM("2", "请求参数不全");
 
     String code;
 

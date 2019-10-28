@@ -100,7 +100,7 @@ public class ExcelUtils {
         } catch (IOException e) {
             throw new ExcelException(ErrorEnum.NOT_EXCEL);
         } catch (Exception e) {
-            throw new ExcelException(ErrorEnum.NOT_EXCEL);
+            throw new ExcelException(ErrorEnum.EMPTY_EXCEL);
         }
         return list;
     }

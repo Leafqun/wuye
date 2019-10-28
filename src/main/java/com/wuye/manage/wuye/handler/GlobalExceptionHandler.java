@@ -17,4 +17,11 @@ public class GlobalExceptionHandler {
         log.error(e.getErrorMsg());
         return new Response(e.getCode(), e.getErrorMsg());
     }
+
+    /*@ExceptionHandler(Exception.class)
+    @ResponseBody
+    Response exceptionResult(Exception e) {
+        log.error(e.getMessage());
+        return new Response("300", e.getMessage());
+    }*/
 }

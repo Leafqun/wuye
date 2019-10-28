@@ -6,6 +6,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wuye.manage.wuye.common.ExcelUtils;
 import com.wuye.manage.wuye.dto.Response;
+import com.wuye.manage.wuye.enums.ErrorEnum;
+import com.wuye.manage.wuye.exception.CrudException;
+import com.wuye.manage.wuye.exception.ParamException;
 import com.wuye.manage.wuye.floor.entity.Floor;
 import com.wuye.manage.wuye.floor.service.IFloorService;
 import io.swagger.annotations.Api;
@@ -13,11 +16,11 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -36,23 +39,26 @@ import java.util.List;
 @Slf4j
 public class FloorController {
 
-    @Autowired
+    @Resource
     private IFloorService floorService;
 
     @ApiOperation("获取楼栋列表分页的接口")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "cid", value = "小区id", required = true),
-            @ApiImplicitParam(name = "current", value = "当前页", required = true),
+            @ApiImplicitParam(name = "current", value = "当前页，默认为1"),
             @ApiImplicitParam(name = "pageSize", value = "分页大小，默认为15"),
             @ApiImplicitParam(name = "floorCode", value = "楼栋编码，查询条件"),
             @ApiImplicitParam(name = "name", value = "楼栋名，查询条件")
     })
     @GetMapping("/getFloorList")
-    public Response<IPage<Floor>> getFloorList(@RequestParam Integer cid, @RequestParam Integer current, Integer pageSize, String floorCode, String name) {
-        Page<Floor> page = new Page<>(current, pageSize == null ? 15 : pageSize);
+    public Response<IPage<Floor>> getFloorList(
+            @RequestParam(required = false, defaultValue = "1") Integer current,
+            @RequestParam(required = false, defaultValue = "15") Integer pageSize,
+            String floorCode,
+            String name) {
+        Page<Floor> page = new Page<>(current, pageSize);
         QueryWrapper<Floor> qw = new QueryWrapper<>();
         qw.eq(!StringUtils.isEmpty(floorCode), "floor_code", floorCode);
-        qw.eq(!StringUtils.isEmpty(name), "name", name);
+        qw.like(!StringUtils.isEmpty(name), "name", name);
         IPage<Floor> p = floorService.page(page, qw);
         return new Response<>(p);
     }
@@ -65,28 +71,31 @@ public class FloorController {
         return new Response<>(floor);
     }
 
-    @ApiOperation("更改楼栋的接口")
+    @ApiOperation("更改和新增楼栋的接口，以楼栋id区分")
     @ApiImplicitParam(name = "floor", value = "楼栋对象")
-    @PostMapping("/update")
-    public Response updateFloor(Floor floor) {
+    @PostMapping("/save")
+    public Response saveFloor(Floor floor) {
+        // fid == null 添加，否则为删除
         if (floor.getFid() == null) {
-            return new Response("1", "请求参数cid为空");
+            if (floor.getCid() == null || StringUtils.isEmpty(floor.getFloorCode())) {
+                throw new ParamException(ErrorEnum.INCOMPLETE_PARAM);
+            }
+            Floor floor1 = floorService.getOne(new QueryWrapper<Floor>().eq("cid", floor.getCid()).eq("floor_code", floor.getFloorCode()).last("limit 1"));
+            if (floor1 != null) {
+                throw new CrudException("100", "楼栋编号已存在");
+            }
+            floor.setCreateTime(LocalDateTime.now());
+        } else {
+            if (floor.getFloorCode() != null) {
+                Floor floor2 = floorService.getOne(new QueryWrapper<Floor>().eq("cid", floor.getCid()).eq("floor_code", floor.getFloorCode()));
+                if (floor2 != null) {
+                    throw new CrudException("100", "楼栋编号已存在");
+                }
+            }
         }
         floor.setUpdateTime(LocalDateTime.now());
-        if (!floorService.updateById(floor)) {
-            return new Response("2", "更新失败");
-        }
-        return new Response();
-    }
-
-    @ApiOperation("插入楼栋的接口")
-    @ApiImplicitParam(name = "floor", value = "楼栋对象")
-    @PostMapping("/insert")
-    public Response insertFloor(Floor floor) {
-        floor.setCreateTime(LocalDateTime.now());
-        floor.setUpdateTime(LocalDateTime.now());
-        if (!floorService.save(floor)) {
-            return new Response("3", "插入失败");
+        if (!floorService.saveOrUpdate(floor)) {
+            throw new CrudException("100", "更改或者新增失败");
         }
         return new Response();
     }
@@ -96,7 +105,7 @@ public class FloorController {
     @GetMapping("delete")
     public Response deleteFloor(@RequestParam Integer fid) {
         if (!floorService.removeById(fid)) {
-            return new Response("4", "删除失败");
+            throw new CrudException("103", "删除失败");
         }
         return new Response();
     }
@@ -106,23 +115,46 @@ public class FloorController {
     @PostMapping("/batchDelete")
     public Response batchDelete(@RequestParam Integer[] fid) {
         if (!floorService.removeByIds(Arrays.asList(fid))) {
-            return new Response("4", "批量删除失败");
+            throw new CrudException("104", "批量删除失败");
         }
         return new Response();
     }
 
+    @ApiOperation("批量添加楼栋的接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "cid", value = "小区id", required = true),
+            @ApiImplicitParam(name = "mid", value = "管理员id", required = true),
+            @ApiImplicitParam(name = "file", value = "上传的Excel文件"),
+    })
     @PostMapping("/batchInsert")
     public Response batchInsert(@RequestParam Integer cid, @RequestParam Integer mid, @RequestParam MultipartFile file) {
         List<Floor> floorList = ExcelUtils.importExcel(file, 0, 1, Floor.class);
+        int i = 1;
         for (Floor floor : floorList) {
+            if (StringUtils.isEmpty(floor.getFloorCode())) {
+                throw new ParamException("3", "第" + i + "行数据楼栋编码不存在");
+            }
+            Floor floor1 = floorService.getOne(new QueryWrapper<Floor>().eq("cid", cid).eq("floor_code", floor.getFloorCode()));
+            if (floor1 != null) {
+                throw new ParamException("3", "第" + i + "行数据楼栋编码已存在");
+            }
             floor.setCid(cid);
             floor.setMid(mid);
             floor.setCreateTime(LocalDateTime.now());
             floor.setUpdateTime(LocalDateTime.now());
+            i++;
         }
         if (!floorService.saveBatch(floorList)) {
-            return new Response("3", "批量插入失败");
+            throw new CrudException("105", "批量插入失败");
         }
         return new Response();
+    }
+
+    @ApiOperation("获取对应小区所有楼栋的接口")
+    @ApiImplicitParam(name = "cid", value = "小区id", required = true)
+    @GetMapping("/getAllFloors")
+    public Response<List<Floor>> getAllFloors(@RequestParam Integer cid) {
+        List<Floor> floorList = floorService.list(new QueryWrapper<Floor>().select("fid, floor_code, name").eq("cid", cid));
+        return new Response<>(floorList);
     }
 }
