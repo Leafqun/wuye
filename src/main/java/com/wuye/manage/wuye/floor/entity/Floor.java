@@ -53,7 +53,7 @@ public class Floor implements Serializable {
     private Integer mid;
 
     @ApiModelProperty(value = "住户数")
-    private Integer peopleNum;
+    private Integer total;
 
     @ApiModelProperty(value = "备注")
     @Excel(name = "备注")

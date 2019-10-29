@@ -8,7 +8,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @SpringBootApplication
 @EnableSwagger2
 //@EnableTransactionManagement
-@MapperScan({"com.wuye.manage.wuye.floor.mapper", "com.wuye.manage.wuye.unit.mapper"})
+@MapperScan({"com.wuye.manage.wuye.*.mapper"})
 public class WuyeApplication {
 
     public static void main(String[] args) {

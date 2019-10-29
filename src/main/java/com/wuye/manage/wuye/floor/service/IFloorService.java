@@ -4,6 +4,7 @@ import com.wuye.manage.wuye.floor.entity.Floor;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * <p>
@@ -17,4 +18,5 @@ public interface IFloorService extends IService<Floor> {
 
     public boolean delete(Serializable id);
 
+    public boolean batchDelete(Collection<? extends Serializable> ids);
 }

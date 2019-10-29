@@ -35,6 +35,7 @@ logging:
   config: classpath:logback-spring.xml
 server:
   port: 9999
+
 ---
 # 开发环境配置
 spring:

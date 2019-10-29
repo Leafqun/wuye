@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wuye.manage.wuye.common.ExcelUtils;
+import com.wuye.manage.wuye.config.ApiVersion;
 import com.wuye.manage.wuye.dto.Response;
 import com.wuye.manage.wuye.enums.ErrorEnum;
 import com.wuye.manage.wuye.exception.CrudException;
@@ -35,8 +36,9 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "楼栋管理相关接口")
-@RequestMapping("/floor")
+@RequestMapping("/api/{version}")
 @Slf4j
+@ApiVersion(1)
 public class FloorController {
 
     @Resource
@@ -49,7 +51,7 @@ public class FloorController {
             @ApiImplicitParam(name = "floorCode", value = "楼栋编码，查询条件"),
             @ApiImplicitParam(name = "name", value = "楼栋名，查询条件")
     })
-    @GetMapping("/getFloorList")
+    @GetMapping("/floors/page")
     public Response<IPage<Floor>> getFloorList(
             @RequestParam(required = false, defaultValue = "1") Integer current,
             @RequestParam(required = false, defaultValue = "15") Integer pageSize,
@@ -65,15 +67,15 @@ public class FloorController {
 
     @ApiOperation("获取楼栋详情的接口")
     @ApiImplicitParam(name = "fid", value = "楼栋id", required = true)
-    @GetMapping("/getFloor")
-    public Response<Floor> getFloor(@RequestParam Integer fid) {
+    @GetMapping("/floors/{fid}")
+    public Response<Floor> getFloor(@RequestParam @PathVariable Integer fid) {
         Floor floor = floorService.getById(fid);
         return new Response<>(floor);
     }
 
     @ApiOperation("更改和新增楼栋的接口，以楼栋id区分")
     @ApiImplicitParam(name = "floor", value = "楼栋对象")
-    @PostMapping("/save")
+    @PostMapping("/floors/save")
     public Response saveFloor(Floor floor) {
         // fid == null 添加，否则为删除
         if (floor.getFid() == null) {
@@ -87,7 +89,8 @@ public class FloorController {
             floor.setCreateTime(LocalDateTime.now());
         } else {
             if (floor.getFloorCode() != null) {
-                Floor floor2 = floorService.getOne(new QueryWrapper<Floor>().eq("cid", floor.getCid()).eq("floor_code", floor.getFloorCode()));
+                Floor f = floorService.getById(floor.getFid());
+                Floor floor2 = floorService.getOne(new QueryWrapper<Floor>().eq("cid", f.getCid()).eq("floor_code", floor.getFloorCode()));
                 if (floor2 != null) {
                     throw new CrudException("100", "楼栋编号已存在");
                 }
@@ -102,19 +105,17 @@ public class FloorController {
 
     @ApiOperation("删除楼栋的接口")
     @ApiImplicitParam(name = "fid", value = "楼栋id", required = true)
-    @GetMapping("delete")
-    public Response deleteFloor(@RequestParam Integer fid) {
-        if (!floorService.removeById(fid)) {
-            throw new CrudException("103", "删除失败");
-        }
+    @DeleteMapping("/floors/{fid}")
+    public Response deleteFloor(@PathVariable Integer fid) {
+        floorService.delete(fid);
         return new Response();
     }
 
     @ApiOperation("批量删除楼栋的接口")
     @ApiImplicitParam(name = "fids", value = "楼栋id数组", required = true)
-    @PostMapping("/batchDelete")
+    @DeleteMapping("/floors")
     public Response batchDelete(@RequestParam Integer[] fid) {
-        if (!floorService.removeByIds(Arrays.asList(fid))) {
+        if (!floorService.batchDelete(Arrays.asList(fid))) {
             throw new CrudException("104", "批量删除失败");
         }
         return new Response();
@@ -123,11 +124,14 @@ public class FloorController {
     @ApiOperation("批量添加楼栋的接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "cid", value = "小区id", required = true),
-            @ApiImplicitParam(name = "mid", value = "管理员id", required = true),
+            @ApiImplicitParam(name = "mid", value = "管理员id"),
             @ApiImplicitParam(name = "file", value = "上传的Excel文件"),
     })
-    @PostMapping("/batchInsert")
-    public Response batchInsert(@RequestParam Integer cid, @RequestParam Integer mid, @RequestParam MultipartFile file) {
+    @PostMapping("/floors/batch-insert")
+    public Response batchInsert(
+            @RequestParam Integer cid,
+            Integer mid,
+            @RequestParam MultipartFile file) {
         List<Floor> floorList = ExcelUtils.importExcel(file, 0, 1, Floor.class);
         int i = 1;
         for (Floor floor : floorList) {
@@ -152,8 +156,8 @@ public class FloorController {
 
     @ApiOperation("获取对应小区所有楼栋的接口")
     @ApiImplicitParam(name = "cid", value = "小区id", required = true)
-    @GetMapping("/getAllFloors")
-    public Response<List<Floor>> getAllFloors(@RequestParam Integer cid) {
+    @GetMapping("communities/{cid}/floors/list")
+    public Response<List<Floor>> getAllFloors(@PathVariable Integer cid) {
         List<Floor> floorList = floorService.list(new QueryWrapper<Floor>().select("fid, floor_code, name").eq("cid", cid));
         return new Response<>(floorList);
     }
