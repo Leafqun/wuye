@@ -1,7 +1,7 @@
 package com.wuye.manage.wuye.room.mapper;
 
-import com.wuye.manage.wuye.room.entity.Room;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.wuye.manage.wuye.room.entity.Room;
 
 /**
  * <p>
@@ -12,5 +12,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @since 2019-10-29
  */
 public interface RoomMapper extends BaseMapper<Room> {
+
 
 }

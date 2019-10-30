@@ -11,6 +11,7 @@ import com.wuye.manage.wuye.enums.ErrorEnum;
 import com.wuye.manage.wuye.exception.CrudException;
 import com.wuye.manage.wuye.exception.ParamException;
 import com.wuye.manage.wuye.floor.entity.Floor;
+import com.wuye.manage.wuye.floor.entity.FloorRoomVo;
 import com.wuye.manage.wuye.floor.service.IFloorService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -44,31 +45,34 @@ public class FloorController {
     @Resource
     private IFloorService floorService;
 
-    @ApiOperation("获取楼栋列表分页的接口")
+    @ApiOperation("获取某个小区楼栋列表分页的接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "current", value = "当前页，默认为1"),
             @ApiImplicitParam(name = "pageSize", value = "分页大小，默认为15"),
+            @ApiImplicitParam(name = "cid", value = "小区id", required = true),
             @ApiImplicitParam(name = "floorCode", value = "楼栋编码，查询条件"),
             @ApiImplicitParam(name = "name", value = "楼栋名，查询条件")
     })
-    @GetMapping("/floors/page")
-    public Response<IPage<Floor>> getFloorList(
+    @GetMapping("/communities/{cid}/floors/page")
+    public Response<IPage<FloorRoomVo>> getFloorList(
             @RequestParam(required = false, defaultValue = "1") Integer current,
             @RequestParam(required = false, defaultValue = "15") Integer pageSize,
+            @PathVariable Integer cid,
             String floorCode,
             String name) {
-        Page<Floor> page = new Page<>(current, pageSize);
-        QueryWrapper<Floor> qw = new QueryWrapper<>();
-        qw.eq(!StringUtils.isEmpty(floorCode), "floor_code", floorCode);
-        qw.like(!StringUtils.isEmpty(name), "name", name);
-        IPage<Floor> p = floorService.page(page, qw);
+        Page<FloorRoomVo> page = new Page<>(current, pageSize);
+        QueryWrapper<FloorRoomVo> qw = new QueryWrapper<>();
+        qw.eq("a.cid", cid);
+        qw.eq(!StringUtils.isEmpty(floorCode), "a.floor_code", floorCode);
+        qw.like(!StringUtils.isEmpty(name), "a.name", name);
+        IPage<FloorRoomVo> p = floorService.selectPageWithNum(page, qw, cid);
         return new Response<>(p);
     }
 
     @ApiOperation("获取楼栋详情的接口")
     @ApiImplicitParam(name = "fid", value = "楼栋id", required = true)
     @GetMapping("/floors/{fid}")
-    public Response<Floor> getFloor(@RequestParam @PathVariable Integer fid) {
+    public Response<Floor> getFloor(@PathVariable Integer fid) {
         Floor floor = floorService.getById(fid);
         return new Response<>(floor);
     }

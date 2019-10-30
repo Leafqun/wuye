@@ -2,7 +2,6 @@
 spring:
   profiles:
     active: prod
-
   ssh:
       host: 119.23.22.99
       user: root
@@ -22,6 +21,10 @@ spring:
   devtools:
     restart:
       enabled: true
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
 
 mybatis-plus:
   # 扫描 mapper.xml

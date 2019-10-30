@@ -12,6 +12,7 @@ import com.wuye.manage.wuye.exception.CrudException;
 import com.wuye.manage.wuye.exception.ParamException;
 import com.wuye.manage.wuye.floor.service.IFloorService;
 import com.wuye.manage.wuye.unit.entity.Unit;
+import com.wuye.manage.wuye.unit.entity.UnitRoomVo;
 import com.wuye.manage.wuye.unit.service.IUnitService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -55,19 +56,19 @@ public class UnitController {
             @ApiImplicitParam(name = "fid", value = "楼栋id，查询条件")
     })
     @GetMapping("/units/page")
-    public Response<IPage<Unit>> getUnitList(
+    public Response<IPage<UnitRoomVo>> getUnitList(
             @RequestParam(required = false, defaultValue = "1") Integer current,
             @RequestParam(required = false, defaultValue = "15") Integer pageSize,
-            String unitCode, Integer cid, Integer fid) {
+            String unitCode, @RequestParam Integer cid, Integer fid) {
 
-        Page<Unit> page = new Page<>(current, pageSize);
-        QueryWrapper<Unit> qw = new QueryWrapper<>();
+        Page<UnitRoomVo> page = new Page<>(current, pageSize);
+        QueryWrapper<UnitRoomVo> qw = new QueryWrapper<>();
         if (cid != null) {
             qw.eq(!StringUtils.isEmpty(unitCode), "unit_code", unitCode);
             qw.eq(fid != null, "fid", "fid");
             qw.eq("cid", cid);
         }
-        IPage<Unit> p = unitService.page(page, qw);
+        IPage<UnitRoomVo> p = unitService.selectPageWithNum(page, qw, cid);
         return new Response<>(p);
     }
 

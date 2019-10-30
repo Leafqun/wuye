@@ -1,8 +1,12 @@
 package com.wuye.manage.wuye.floor.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wuye.manage.wuye.floor.entity.Floor;
+import com.wuye.manage.wuye.floor.entity.FloorRoomVo;
 import com.wuye.manage.wuye.floor.mapper.FloorMapper;
 import com.wuye.manage.wuye.floor.service.IFloorService;
 import com.wuye.manage.wuye.room.entity.Room;
@@ -35,6 +39,11 @@ public class FloorServiceImpl extends ServiceImpl<FloorMapper, Floor> implements
 
     @Resource
     private RoomMapper roomMapper;
+
+    @Override
+    public IPage<FloorRoomVo> selectPageWithNum(Page<FloorRoomVo> page, Wrapper wrapper, Integer cid) {
+        return floorMapper.selectPageWithNum(page, wrapper, cid);
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

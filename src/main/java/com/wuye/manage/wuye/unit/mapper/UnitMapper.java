@@ -1,7 +1,14 @@
 package com.wuye.manage.wuye.unit.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wuye.manage.wuye.unit.entity.Unit;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.wuye.manage.wuye.unit.entity.UnitRoomVo;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * <p>
@@ -13,4 +20,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface UnitMapper extends BaseMapper<Unit> {
 
+    @Select("select a.*, count(uid) as num from unit a left join room b on b.uid = a.uid and b.cid=#{cid} ${ew.customSqlSegment} group by a.uid")
+    public IPage<UnitRoomVo> selectPageWithNum(Page<UnitRoomVo> page, @Param(Constants.WRAPPER) Wrapper wrapper, @Param("cid") Integer cid);
 }

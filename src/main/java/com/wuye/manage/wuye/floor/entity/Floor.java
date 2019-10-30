@@ -3,6 +3,7 @@ package com.wuye.manage.wuye.floor.entity;
 import cn.afterturn.easypoi.excel.annotation.Excel;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -44,16 +45,15 @@ public class Floor implements Serializable {
     private String name;
 
     @ApiModelProperty(value = "创建时间")
+    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
     @ApiModelProperty(value = "更新时间")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
     @ApiModelProperty(value = "创建人")
     private Integer mid;
-
-    @ApiModelProperty(value = "住户数")
-    private Integer total;
 
     @ApiModelProperty(value = "备注")
     @Excel(name = "备注")

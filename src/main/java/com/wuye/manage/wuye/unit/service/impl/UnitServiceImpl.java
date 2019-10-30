@@ -1,10 +1,14 @@
 package com.wuye.manage.wuye.unit.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wuye.manage.wuye.room.entity.Room;
 import com.wuye.manage.wuye.room.mapper.RoomMapper;
 import com.wuye.manage.wuye.unit.entity.Unit;
+import com.wuye.manage.wuye.unit.entity.UnitRoomVo;
 import com.wuye.manage.wuye.unit.mapper.UnitMapper;
 import com.wuye.manage.wuye.unit.service.IUnitService;
 import org.springframework.stereotype.Service;
@@ -30,6 +34,11 @@ public class UnitServiceImpl extends ServiceImpl<UnitMapper, Unit> implements IU
 
     @Resource
     private RoomMapper roomMapper;
+
+    @Override
+    public IPage<UnitRoomVo> selectPageWithNum(Page<UnitRoomVo> page, Wrapper<UnitRoomVo> wrapper, Integer cid) {
+        return unitMapper.selectPageWithNum(page, wrapper, cid);
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
