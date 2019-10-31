@@ -36,7 +36,7 @@ public class Unit implements Serializable {
     private String unitCode;
 
     @ApiModelProperty(value = "创建人")
-    private Integer mid;
+    private Integer cmid;
 
     @ApiModelProperty(value = "楼栋id")
     private Integer fid;

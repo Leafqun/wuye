@@ -11,7 +11,7 @@ import com.wuye.manage.wuye.enums.ErrorEnum;
 import com.wuye.manage.wuye.exception.CrudException;
 import com.wuye.manage.wuye.exception.ParamException;
 import com.wuye.manage.wuye.floor.entity.Floor;
-import com.wuye.manage.wuye.floor.entity.FloorRoomVo;
+import com.wuye.manage.wuye.floor.entity.FloorManagerVo;
 import com.wuye.manage.wuye.floor.service.IFloorService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,7 +37,7 @@ import java.util.List;
  * @since 2019-10-24
  */
 @RestController
-@Api(tags = "楼栋管理相关接口")
+@Api()
 @RequestMapping("/api/{version}")
 @Slf4j
 @ApiVersion(1)
@@ -54,18 +55,18 @@ public class FloorController {
             @ApiImplicitParam(name = "name", value = "楼栋名，查询条件")
     })
     @GetMapping("/communities/{cid}/floors/page")
-    public Response<IPage<FloorRoomVo>> getFloorList(
+    public Response<IPage<FloorManagerVo>> getFloorList(
             @RequestParam(required = false, defaultValue = "1") Integer current,
             @RequestParam(required = false, defaultValue = "15") Integer pageSize,
             @PathVariable Integer cid,
             String floorCode,
             String name) {
-        Page<FloorRoomVo> page = new Page<>(current, pageSize);
-        QueryWrapper<FloorRoomVo> qw = new QueryWrapper<>();
+        Page<FloorManagerVo> page = new Page<>(current, pageSize);
+        QueryWrapper<FloorManagerVo> qw = new QueryWrapper<>();
         qw.eq("a.cid", cid);
         qw.eq(!StringUtils.isEmpty(floorCode), "a.floor_code", floorCode);
         qw.like(!StringUtils.isEmpty(name), "a.name", name);
-        IPage<FloorRoomVo> p = floorService.selectPageWithNum(page, qw, cid);
+        IPage<FloorManagerVo> p = floorService.selectPageWithManager(page, qw, cid);
         return new Response<>(p);
     }
 
@@ -131,10 +132,10 @@ public class FloorController {
             @ApiImplicitParam(name = "mid", value = "管理员id"),
             @ApiImplicitParam(name = "file", value = "上传的Excel文件"),
     })
-    @PostMapping("/floors/batch-insert")
-    public Response batchInsert(
+    @PostMapping("/floors/batch-insert-excel")
+    public Response batchInsertExcel(
             @RequestParam Integer cid,
-            Integer mid,
+            Integer cmid,
             @RequestParam MultipartFile file) {
         List<Floor> floorList = ExcelUtils.importExcel(file, 0, 1, Floor.class);
         int i = 1;
@@ -147,7 +148,7 @@ public class FloorController {
                 throw new ParamException("3", "第" + i + "行数据楼栋编码已存在");
             }
             floor.setCid(cid);
-            floor.setMid(mid);
+            floor.setCmid(cmid);
             floor.setCreateTime(LocalDateTime.now());
             floor.setUpdateTime(LocalDateTime.now());
             i++;
@@ -157,6 +158,45 @@ public class FloorController {
         }
         return new Response();
     }
+
+    @ApiOperation("批量添加楼栋的接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "cid", value = "小区id", required = true),
+            @ApiImplicitParam(name = "mid", value = "管理员id"),
+            @ApiImplicitParam(name = "file", value = "上传的Excel文件"),
+    })
+    @PostMapping("/floors/batch-insert")
+    public Response batchInsert(@RequestParam Integer cid, @RequestParam Integer cmid, @RequestParam Integer start, @RequestParam Integer end, String regex) {
+        List<Floor> floorList = new ArrayList<>();
+        int failNum = 0;
+        for (int i = start; i < end + 1; i++) {
+            String floorCode = String.valueOf(i);
+            Floor f = floorService.getOne(new QueryWrapper<Floor>().eq("floor_code", floorCode).eq("cid", cid));
+            if (f != null) {
+                failNum++;
+                continue;
+            }
+            Floor floor = new Floor();
+            floor.setCid(cid);
+            floor.setCmid(cmid);
+            floor.setFloorCode(floorCode);
+            floor.setCreateTime(LocalDateTime.now());
+            floor.setUpdateTime(LocalDateTime.now());
+            if (StringUtils.isEmpty(regex)) {
+                floor.setName(i + "号楼");
+            } else {
+                floor.setName(regex.replace("%", floorCode));
+            }
+        }
+        if (!floorService.saveBatch(floorList)) {
+            throw new CrudException("105", "批量插入失败");
+        }
+        if (failNum == 0) {
+            return new Response();
+        }
+        return new Response("105", (end - start) + "条插入成功，" + failNum + "条插入失败");
+    }
+
 
     @ApiOperation("获取对应小区所有楼栋的接口")
     @ApiImplicitParam(name = "cid", value = "小区id", required = true)

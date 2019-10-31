@@ -70,7 +70,7 @@ public class Room implements Serializable {
     private BigDecimal unitPrice;
 
     @ApiModelProperty(value = "创建人")
-    private Integer mid;
+    private Integer cmid;
 
     @ApiModelProperty(value = "备注")
     private String remark;

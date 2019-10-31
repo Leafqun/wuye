@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wuye.manage.wuye.floor.entity.Floor;
+import com.wuye.manage.wuye.floor.entity.FloorManagerVo;
 import com.wuye.manage.wuye.floor.entity.FloorRoomVo;
 import com.wuye.manage.wuye.floor.mapper.FloorMapper;
 import com.wuye.manage.wuye.floor.service.IFloorService;
@@ -43,6 +44,11 @@ public class FloorServiceImpl extends ServiceImpl<FloorMapper, Floor> implements
     @Override
     public IPage<FloorRoomVo> selectPageWithNum(Page<FloorRoomVo> page, Wrapper wrapper, Integer cid) {
         return floorMapper.selectPageWithNum(page, wrapper, cid);
+    }
+
+    @Override
+    public IPage<FloorManagerVo> selectPageWithManager(Page<FloorManagerVo> page, Wrapper wrapper, Integer cid) {
+        return floorMapper.selectPageWithManager(page, wrapper, cid);
     }
 
     @Override

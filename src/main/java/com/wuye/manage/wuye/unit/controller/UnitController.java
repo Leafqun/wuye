@@ -141,7 +141,7 @@ public class UnitController {
             @RequestParam Integer cid,
             @RequestParam Integer fid,
             @RequestParam MultipartFile file,
-            Integer mid) {
+            Integer cmid) {
         List<Unit> unitList = ExcelUtils.importExcel(file, 0, 1, Unit.class);
         int i = 1;
         for (Unit unit : unitList) {
@@ -156,7 +156,7 @@ public class UnitController {
             unit.setUpdateTime(LocalDateTime.now());
             unit.setCid(cid);
             unit.setFid(fid);
-            unit.setMid(mid);
+            unit.setCmid(cmid);
         }
         if (!unitService.saveBatch(unitList)) {
             throw new CrudException("105", "批量插入失败");

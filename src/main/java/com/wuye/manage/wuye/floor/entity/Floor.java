@@ -53,7 +53,7 @@ public class Floor implements Serializable {
     private LocalDateTime updateTime;
 
     @ApiModelProperty(value = "创建人")
-    private Integer mid;
+    private Integer cmid;
 
     @ApiModelProperty(value = "备注")
     @Excel(name = "备注")
