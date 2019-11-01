@@ -37,7 +37,7 @@ import java.util.List;
  * @since 2019-10-24
  */
 @RestController
-@Api()
+@Api(tags = "楼栋管理相关接口")
 @RequestMapping("/api/{version}")
 @Slf4j
 @ApiVersion(1)
@@ -162,8 +162,10 @@ public class FloorController {
     @ApiOperation("批量添加楼栋的接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "cid", value = "小区id", required = true),
-            @ApiImplicitParam(name = "mid", value = "管理员id"),
-            @ApiImplicitParam(name = "file", value = "上传的Excel文件"),
+            @ApiImplicitParam(name = "cmid", value = "管理员id", required = true),
+            @ApiImplicitParam(name = "start", value = "楼栋编码开始", required = true),
+            @ApiImplicitParam(name = "end", value = "楼栋编码截止", required = true),
+            @ApiImplicitParam(name = "regex", value = "楼栋名格式，默认%号楼，以%代替数字，可输入%幢等"),
     })
     @PostMapping("/floors/batch-insert")
     public Response batchInsert(@RequestParam Integer cid, @RequestParam Integer cmid, @RequestParam Integer start, @RequestParam Integer end, String regex) {
@@ -187,6 +189,7 @@ public class FloorController {
             } else {
                 floor.setName(regex.replace("%", floorCode));
             }
+            floorList.add(floor);
         }
         if (!floorService.saveBatch(floorList)) {
             throw new CrudException("105", "批量插入失败");
@@ -194,7 +197,7 @@ public class FloorController {
         if (failNum == 0) {
             return new Response();
         }
-        return new Response("105", (end - start) + "条插入成功，" + failNum + "条插入失败");
+        return new Response("105", (end - start - failNum + 1) + "条插入成功，" + failNum + "条插入失败");
     }
 
 
