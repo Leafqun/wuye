@@ -7,9 +7,9 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@ApiModel(value = "FloorManagerVo对象", description = "带创建人的楼栋信息")
-public class FloorManagerVo extends Floor{
+@ApiModel(value = "FloorUserVo对象", description = "带创建人的楼栋信息")
+public class FloorUserVo extends Floor{
 
     @ApiModelProperty(value = "创建人姓名")
-    private String managerName;
+    private String username;
 }

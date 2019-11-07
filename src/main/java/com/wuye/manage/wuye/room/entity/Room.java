@@ -2,6 +2,7 @@ package com.wuye.manage.wuye.room.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -25,22 +26,23 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @ApiModel(value="Room对象", description="房屋")
+@TableName("t_room")
 public class Room implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "房屋id")
-    @TableId(value = "rid", type = IdType.AUTO)
-    private Integer rid;
+    @TableId(value = "room_id", type = IdType.AUTO)
+    private Integer roomId;
 
     @ApiModelProperty(value = "房屋编号")
     private String roomCode;
 
     @ApiModelProperty(value = "单元id")
-    private Integer uid;
+    private Integer unitId;
 
     @ApiModelProperty(value = "楼栋id")
-    private Integer fid;
+    private Integer floorId;
 
     @ApiModelProperty(value = "项目id")
     private Integer prid;
@@ -52,7 +54,7 @@ public class Room implements Serializable {
     private Integer layer;
 
     @ApiModelProperty(value = "业主id")
-    private Integer ownerId;
+    private Integer residentId;
 
     @ApiModelProperty(value = "业主名称")
     private String name;

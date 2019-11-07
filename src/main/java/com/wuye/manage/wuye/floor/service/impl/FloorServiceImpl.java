@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wuye.manage.wuye.floor.entity.Floor;
-import com.wuye.manage.wuye.floor.entity.FloorManagerVo;
+import com.wuye.manage.wuye.floor.entity.FloorUserVo;
 import com.wuye.manage.wuye.floor.entity.FloorRoomVo;
 import com.wuye.manage.wuye.floor.mapper.FloorMapper;
 import com.wuye.manage.wuye.floor.service.IFloorService;
@@ -47,16 +47,16 @@ public class FloorServiceImpl extends ServiceImpl<FloorMapper, Floor> implements
     }
 
     @Override
-    public IPage<FloorManagerVo> selectPageWithManager(Page<FloorManagerVo> page, Wrapper wrapper, Integer cid) {
-        return floorMapper.selectPageWithManager(page, wrapper, cid);
+    public IPage<FloorUserVo> selectPageWithUser(Page<FloorUserVo> page, Wrapper wrapper, Integer cid) {
+        return floorMapper.selectPageWithUser(page, wrapper, cid);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean delete(Serializable id) {
-        floorMapper.deleteById(id);
-        unitMapper.delete(new QueryWrapper<Unit>().eq("fid", id));
-        roomMapper.delete(new QueryWrapper<Room>().eq("fid", id));
+    public boolean delete(Serializable floorId) {
+        floorMapper.deleteById(floorId);
+        unitMapper.delete(new QueryWrapper<Unit>().eq("floor_id", floorId));
+        roomMapper.delete(new QueryWrapper<Room>().eq("floor_id", floorId));
         return true;
     }
 
@@ -65,8 +65,8 @@ public class FloorServiceImpl extends ServiceImpl<FloorMapper, Floor> implements
     public boolean batchDelete(Collection<? extends Serializable> ids) {
         for (Serializable id : ids) {
             floorMapper.deleteById(id);
-            unitMapper.delete(new QueryWrapper<Unit>().eq("fid", id));
-            roomMapper.delete(new QueryWrapper<Room>().eq("fid", id));
+            unitMapper.delete(new QueryWrapper<Unit>().eq("floor_id", id));
+            roomMapper.delete(new QueryWrapper<Room>().eq("floor_id", id));
         }
         return true;
     }

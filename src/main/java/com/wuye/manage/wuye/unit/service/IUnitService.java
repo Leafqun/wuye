@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wuye.manage.wuye.unit.entity.Unit;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wuye.manage.wuye.unit.entity.UnitRoomVo;
+import com.wuye.manage.wuye.unit.entity.UnitUserVo;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -21,6 +22,8 @@ import java.util.Collection;
 public interface IUnitService extends IService<Unit> {
 
     public IPage<UnitRoomVo> selectPageWithNum(Page<UnitRoomVo> page, Wrapper<UnitRoomVo> wrapper, Integer cid);
+
+    public IPage<UnitUserVo> selectPageWithUser(Page<UnitUserVo> page, Wrapper<UnitUserVo> wrapper, Integer cid);
 
     public boolean delete(Serializable id);
 

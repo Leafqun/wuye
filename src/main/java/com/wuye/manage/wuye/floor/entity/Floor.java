@@ -3,6 +3,7 @@ package com.wuye.manage.wuye.floor.entity;
 import cn.afterturn.easypoi.excel.annotation.Excel;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -25,13 +26,14 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @ApiModel(value="Floor对象", description="楼栋")
+@TableName("t_floor")
 public class Floor implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "楼栋id")
-    @TableId(value = "fid", type = IdType.AUTO)
-    private Integer fid;
+    @TableId(value = "floor_id", type = IdType.AUTO)
+    private Integer floorId;
 
     @ApiModelProperty(value = "小区id")
     private Integer cid;
@@ -53,7 +55,7 @@ public class Floor implements Serializable {
     private LocalDateTime updateTime;
 
     @ApiModelProperty(value = "创建人")
-    private Integer cmid;
+    private Integer userId;
 
     @ApiModelProperty(value = "备注")
     @Excel(name = "备注")

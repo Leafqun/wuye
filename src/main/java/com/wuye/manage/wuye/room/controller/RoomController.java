@@ -75,19 +75,19 @@ public class RoomController {
     @PostMapping("/rooms/save")
     public Response save(Room room) {
         // rid为空，添加否则为修改
-        if (room.getRid() == null) {
-            if (room.getCid() == null || room.getFid() == null || room.getUid() == null || StringUtils.isEmpty(room.getRoomCode())) {
+        if (room.getRoomId() == null) {
+            if (room.getCid() == null || room.getFloorId() == null || room.getUnitId() == null || StringUtils.isEmpty(room.getRoomCode())) {
                 throw new ParamException(ErrorEnum.INCOMPLETE_PARAM);
             }
-            Room room1 = roomService.getOne(new QueryWrapper<Room>().eq("room_code", room.getRoomCode()).eq("uid", room.getUid()).eq("fid", room.getFid()).eq("cid", room.getCid()));
+            Room room1 = roomService.getOne(new QueryWrapper<Room>().eq("room_code", room.getRoomCode()).eq("uid", room.getUnitId()).eq("fid", room.getFloorId()).eq("cid", room.getCid()));
             if (room1 != null) {
                 throw new ParamException("103", "房屋编号已存在");
             }
             room.setCreateTime(LocalDateTime.now());
         } else {
             if (!StringUtils.isEmpty(room.getRoomCode())) {
-                Room r = roomService.getById(room.getRid());
-                Room room1 = roomService.getOne(new QueryWrapper<Room>().eq("room_code", room.getRoomCode()).eq("uid", r.getUid()).eq("fid", r.getFid()).eq("cid", r.getCid()));
+                Room r = roomService.getById(room.getRoomId());
+                Room room1 = roomService.getOne(new QueryWrapper<Room>().eq("room_code", room.getRoomCode()).eq("uid", r.getUnitId()).eq("fid", r.getFloorId()).eq("cid", r.getCid()));
                 if (room1 != null) {
                     throw new ParamException("103", "房屋编号已存在");
                 }

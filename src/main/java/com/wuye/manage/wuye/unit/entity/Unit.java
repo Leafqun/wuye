@@ -2,6 +2,7 @@ package com.wuye.manage.wuye.unit.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -24,22 +25,23 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @ApiModel(value="Unit对象", description="单元表")
+@TableName("t_unit")
 public class Unit implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "单元id")
-    @TableId(value = "uid", type = IdType.AUTO)
-    private Integer uid;
+    @TableId(value = "unit_id", type = IdType.AUTO)
+    private Integer unitId;
 
     @ApiModelProperty(value = "单元编号")
     private String unitCode;
 
     @ApiModelProperty(value = "创建人")
-    private Integer cmid;
+    private Integer userId;
 
     @ApiModelProperty(value = "楼栋id")
-    private Integer fid;
+    private Integer floorId;
 
     @ApiModelProperty(value = "小区id")
     private Integer cid;

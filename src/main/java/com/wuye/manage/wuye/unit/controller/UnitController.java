@@ -12,7 +12,7 @@ import com.wuye.manage.wuye.exception.CrudException;
 import com.wuye.manage.wuye.exception.ParamException;
 import com.wuye.manage.wuye.floor.service.IFloorService;
 import com.wuye.manage.wuye.unit.entity.Unit;
-import com.wuye.manage.wuye.unit.entity.UnitRoomVo;
+import com.wuye.manage.wuye.unit.entity.UnitUserVo;
 import com.wuye.manage.wuye.unit.service.IUnitService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -53,22 +53,22 @@ public class UnitController {
             @ApiImplicitParam(name = "pageSize", value = "分页大小，默认为15"),
             @ApiImplicitParam(name = "unitCode", value = "单元编码，查询条件"),
             @ApiImplicitParam(name = "cid", value = "小区id，查询条件", required = true),
-            @ApiImplicitParam(name = "fid", value = "楼栋id，查询条件")
+            @ApiImplicitParam(name = "floorId", value = "楼栋id，查询条件")
     })
     @GetMapping("/units/page")
-    public Response<IPage<UnitRoomVo>> getUnitList(
+    public Response<IPage<UnitUserVo>> getUnitList(
             @RequestParam(required = false, defaultValue = "1") Integer current,
             @RequestParam(required = false, defaultValue = "15") Integer pageSize,
-            String unitCode, @RequestParam Integer cid, Integer fid) {
+            String unitCode, @RequestParam Integer cid, Integer floorId) {
 
-        Page<UnitRoomVo> page = new Page<>(current, pageSize);
-        QueryWrapper<UnitRoomVo> qw = new QueryWrapper<>();
+        Page<UnitUserVo> page = new Page<>(current, pageSize);
+        QueryWrapper<UnitUserVo> qw = new QueryWrapper<>();
         if (cid != null) {
             qw.eq(!StringUtils.isEmpty(unitCode), "unit_code", unitCode);
-            qw.eq(fid != null, "fid", "fid");
+            qw.eq(floorId != null, "fid", "fid");
             qw.eq("cid", cid);
         }
-        IPage<UnitRoomVo> p = unitService.selectPageWithNum(page, qw, cid);
+        IPage<UnitUserVo> p = unitService.selectPageWithUser(page, qw, cid);
         return new Response<>(p);
     }
 
@@ -84,19 +84,19 @@ public class UnitController {
     @PostMapping("/units/save")
     public Response saveUnit(Unit unit) {
         // uid为空为添加否则为更改
-        if (unit.getUid() == null) {
-            if (unit.getCid() == null || unit.getFid() == null || StringUtils.isEmpty(unit.getUnitCode())) {
+        if (unit.getUnitId() == null) {
+            if (unit.getCid() == null || unit.getFloorId() == null || StringUtils.isEmpty(unit.getUnitCode())) {
                 throw new ParamException(ErrorEnum.INCOMPLETE_PARAM);
             }
-            Unit unit1 = unitService.getOne(new QueryWrapper<Unit>().eq("fid", unit.getFid()).eq("unit_code", unit.getUnitCode()));
+            Unit unit1 = unitService.getOne(new QueryWrapper<Unit>().eq("fid", unit.getFloorId()).eq("unit_code", unit.getUnitCode()));
             if (unit1 != null) {
                 throw new ParamException("3", "单元编号已存在");
             }
             unit.setCreateTime(LocalDateTime.now());
         } else {
             if (!StringUtils.isEmpty(unit.getUnitCode())) {
-                Unit u = unitService.getById(unit.getUid());
-                Unit unit1 = unitService.getOne(new QueryWrapper<Unit>().eq("cid", u.getCid()).eq("fid", u.getFid()).eq("unit_code", unit.getUnitCode()));
+                Unit u = unitService.getById(unit.getUnitId());
+                Unit unit1 = unitService.getOne(new QueryWrapper<Unit>().eq("cid", u.getCid()).eq("fid", u.getFloorId()).eq("unit_code", unit.getUnitCode()));
                 if (unit1 != null) {
                     throw new ParamException("3", "单元编号已存在");
                 }
@@ -155,8 +155,8 @@ public class UnitController {
             unit.setCreateTime(LocalDateTime.now());
             unit.setUpdateTime(LocalDateTime.now());
             unit.setCid(cid);
-            unit.setFid(fid);
-            unit.setCmid(cmid);
+            unit.setFloorId(fid);
+            unit.setUserId(cmid);
         }
         if (!unitService.saveBatch(unitList)) {
             throw new CrudException("105", "批量插入失败");

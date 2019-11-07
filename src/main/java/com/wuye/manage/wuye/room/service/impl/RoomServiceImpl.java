@@ -39,10 +39,10 @@ public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room> implements IR
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean insertOrUpdate(Room room) {
-        if (room.getRid() == null) {
+        if (room.getRoomId() == null) {
             roomMapper.insert(room);
-            unitMapper.update(null, new UpdateWrapper<Unit>().setSql("total = total + 1").eq("uid", room.getUid()));
-            floorMapper.update(null, new UpdateWrapper<Floor>().setSql("total = total + 1").eq("fid", room.getFid()));
+            unitMapper.update(null, new UpdateWrapper<Unit>().setSql("total = total + 1").eq("uid", room.getUnitId()));
+            floorMapper.update(null, new UpdateWrapper<Floor>().setSql("total = total + 1").eq("fid", room.getFloorId()));
         } else {
             roomMapper.updateById(room);
         }
@@ -56,8 +56,8 @@ public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room> implements IR
         if (room == null) {
             return false;
         }
-        unitMapper.update(null, new UpdateWrapper<Unit>().setSql("total = total - 1").eq("uid", room.getUid()));
-        floorMapper.update(null, new UpdateWrapper<Floor>().setSql("total = total - 1").eq("fid", room.getFid()));
+        unitMapper.update(null, new UpdateWrapper<Unit>().setSql("total = total - 1").eq("uid", room.getUnitId()));
+        floorMapper.update(null, new UpdateWrapper<Floor>().setSql("total = total - 1").eq("fid", room.getFloorId()));
         return true;
     }
 

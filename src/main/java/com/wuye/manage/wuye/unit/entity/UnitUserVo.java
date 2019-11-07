@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-public class UnitManagerVo extends Unit {
+public class UnitUserVo extends Unit {
 
-    private String managerName;
+    private String username;
 }
