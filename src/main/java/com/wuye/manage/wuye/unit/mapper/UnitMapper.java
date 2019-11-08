@@ -24,6 +24,6 @@ public interface UnitMapper extends BaseMapper<Unit> {
     @Select("select a.*, count(uid) as num from unit a left join room b on b.uid = a.uid and b.cid=#{cid} ${ew.customSqlSegment} group by a.uid")
     public IPage<UnitRoomVo> selectPageWithNum(Page<UnitRoomVo> page, @Param(Constants.WRAPPER) Wrapper wrapper, @Param("cid") Integer cid);
 
-    @Select("select a.*, b.username from t_unit a left join t_community_user b on b.cid = a.cid and b.cid = #{cid} left join community_manager c on c.user_id = b.user_id")
+    @Select("select a.*, c.username from t_unit a left join t_community_user b on b.cid = a.cid and b.cid = #{cid} left join t_user c on c.user_id = b.user_id ${ew.customSqlSegment}")
     public IPage<UnitUserVo> selectPageWithUser(Page<UnitUserVo> page, @Param(Constants.WRAPPER) Wrapper wrapper, @Param("cid") Integer cid);
 }

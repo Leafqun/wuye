@@ -55,7 +55,7 @@ public class UnitController {
             @ApiImplicitParam(name = "cid", value = "小区id，查询条件", required = true),
             @ApiImplicitParam(name = "floorId", value = "楼栋id，查询条件")
     })
-    @GetMapping("/units/page")
+    @PostMapping("/units/page")
     public Response<IPage<UnitUserVo>> getUnitList(
             @RequestParam(required = false, defaultValue = "1") Integer current,
             @RequestParam(required = false, defaultValue = "15") Integer pageSize,
@@ -63,20 +63,20 @@ public class UnitController {
 
         Page<UnitUserVo> page = new Page<>(current, pageSize);
         QueryWrapper<UnitUserVo> qw = new QueryWrapper<>();
-        if (cid != null) {
-            qw.eq(!StringUtils.isEmpty(unitCode), "unit_code", unitCode);
-            qw.eq(floorId != null, "fid", "fid");
-            qw.eq("cid", cid);
-        }
+
+        qw.eq(!StringUtils.isEmpty(unitCode), "a.unit_code", unitCode);
+        qw.eq(floorId != null, "a.floor_id", floorId);
+        qw.eq("a.cid", cid);
+
         IPage<UnitUserVo> p = unitService.selectPageWithUser(page, qw, cid);
         return new Response<>(p);
     }
 
     @ApiOperation("获取单元信息的接口")
-    @ApiImplicitParam(name = "uid", value = "单元id", required = true)
-    @GetMapping("/units/{uid}")
-    public Response<Unit> getUnit(@PathVariable Integer uid) {
-        Unit unit = unitService.getById(uid);
+    @ApiImplicitParam(name = "unitId", value = "单元id", required = true)
+    @PostMapping("/units/{unitId}")
+    public Response<Unit> getUnit(@PathVariable Integer unitId) {
+        Unit unit = unitService.getById(unitId);
         return new Response<>(unit);
     }
 
@@ -88,7 +88,7 @@ public class UnitController {
             if (unit.getCid() == null || unit.getFloorId() == null || StringUtils.isEmpty(unit.getUnitCode())) {
                 throw new ParamException(ErrorEnum.INCOMPLETE_PARAM);
             }
-            Unit unit1 = unitService.getOne(new QueryWrapper<Unit>().eq("fid", unit.getFloorId()).eq("unit_code", unit.getUnitCode()));
+            Unit unit1 = unitService.getOne(new QueryWrapper<Unit>().eq("floor_id", unit.getFloorId()).eq("unit_code", unit.getUnitCode()));
             if (unit1 != null) {
                 throw new ParamException("3", "单元编号已存在");
             }
@@ -96,7 +96,7 @@ public class UnitController {
         } else {
             if (!StringUtils.isEmpty(unit.getUnitCode())) {
                 Unit u = unitService.getById(unit.getUnitId());
-                Unit unit1 = unitService.getOne(new QueryWrapper<Unit>().eq("cid", u.getCid()).eq("fid", u.getFloorId()).eq("unit_code", unit.getUnitCode()));
+                Unit unit1 = unitService.getOne(new QueryWrapper<Unit>().eq("cid", u.getCid()).eq("floor_id", u.getFloorId()).eq("unit_code", unit.getUnitCode()));
                 if (unit1 != null) {
                     throw new ParamException("3", "单元编号已存在");
                 }
@@ -110,20 +110,20 @@ public class UnitController {
     }
 
     @ApiOperation("删除单元信息的接口")
-    @ApiImplicitParam(name = "uid", value = "单元id", required = true)
-    @DeleteMapping("/units/{uid}")
-    public Response deleteUnit(@PathVariable Integer uid) {
-        if (!unitService.delete(uid)) {
-            throw new CrudException("103", uid + "删除失败");
+    @ApiImplicitParam(name = "unitId", value = "单元id", required = true)
+    @PostMapping("/units/delete/{unitId}")
+    public Response deleteUnit(@PathVariable Integer unitId) {
+        if (!unitService.delete(unitId)) {
+            throw new CrudException("103", unitId + "删除失败");
         }
         return new Response();
     }
 
     @ApiOperation("批量删除单元信息的接口")
-    @ApiImplicitParam(name = "uid", value = "单元id数组", required = true)
-    @DeleteMapping("/units")
-    public Response batchDelete(@RequestParam Integer[] uid) {
-        if (!unitService.batchDelete(Arrays.asList(uid))) {
+    @ApiImplicitParam(name = "unitId", value = "单元id数组", required = true)
+    @PostMapping("/units/delete")
+    public Response batchDelete(@RequestParam Integer[] unitId) {
+        if (!unitService.batchDelete(Arrays.asList(unitId))) {
             throw new CrudException("103", "批量删除失败");
         }
         return new Response();
@@ -139,7 +139,7 @@ public class UnitController {
     @PostMapping("/units/batch-insert")
     public Response batchInsert(
             @RequestParam Integer cid,
-            @RequestParam Integer fid,
+            @RequestParam Integer floorId,
             @RequestParam MultipartFile file,
             Integer cmid) {
         List<Unit> unitList = ExcelUtils.importExcel(file, 0, 1, Unit.class);
@@ -148,14 +148,14 @@ public class UnitController {
             if (!StringUtils.isEmpty(unit)) {
                 throw new ParamException("3", "第" + i + "行数据单元编码不存在");
             }
-            Unit u = unitService.getOne(new QueryWrapper<Unit>().eq("unit_code", unit.getUnitCode()).eq("fid", fid).eq("cid", cid));
+            Unit u = unitService.getOne(new QueryWrapper<Unit>().eq("unit_code", unit.getUnitCode()).eq("floor_id", floorId).eq("cid", cid));
             if (u != null) {
                 throw new ParamException("3", "第" + i + "行数据单元编码已存在");
             }
             unit.setCreateTime(LocalDateTime.now());
             unit.setUpdateTime(LocalDateTime.now());
             unit.setCid(cid);
-            unit.setFloorId(fid);
+            unit.setFloorId(floorId);
             unit.setUserId(cmid);
         }
         if (!unitService.saveBatch(unitList)) {
@@ -165,10 +165,10 @@ public class UnitController {
     }
 
     @ApiOperation("获取某一楼栋所有单元信息的接口")
-    @ApiImplicitParam(name = "fid", value = "楼栋id", required = true)
-    @GetMapping("/floors/{fid}/units/list")
-    public Response<List<Unit>> getUnitListByFid(@PathVariable Integer fid) {
-        List<Unit> unitList = unitService.list(new QueryWrapper<Unit>().eq("fid", fid));
+    @ApiImplicitParam(name = "floorId", value = "楼栋id", required = true)
+    @PostMapping("/floors/{floorId}/units/list")
+    public Response<List<Unit>> getUnitListByFid(@PathVariable Integer floorId) {
+        List<Unit> unitList = unitService.list(new QueryWrapper<Unit>().eq("floor_id", floorId));
         return new Response<>(unitList);
     }
 

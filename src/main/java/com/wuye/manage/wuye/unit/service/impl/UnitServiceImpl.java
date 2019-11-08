@@ -50,7 +50,7 @@ public class UnitServiceImpl extends ServiceImpl<UnitMapper, Unit> implements IU
     @Transactional(rollbackFor = Exception.class)
     public boolean delete(Serializable id) {
         unitMapper.deleteById(id);
-        roomMapper.delete(new QueryWrapper<Room>().eq("uid", id));
+        roomMapper.delete(new QueryWrapper<Room>().eq("unit_id", id));
         return true;
     }
 
@@ -58,7 +58,7 @@ public class UnitServiceImpl extends ServiceImpl<UnitMapper, Unit> implements IU
     public boolean batchDelete(Collection<? extends Serializable> ids) {
         for (Serializable id : ids) {
             unitMapper.deleteById(id);
-            roomMapper.delete(new QueryWrapper<Room>().eq("uid", id));
+            roomMapper.delete(new QueryWrapper<Room>().eq("unit_id", id));
         }
         return true;
     }
