@@ -42,21 +42,21 @@ public class RoomController {
             @ApiImplicitParam(name = "current", value = "当前页，默认为1"),
             @ApiImplicitParam(name = "pageSize", value = "分页大小，默认为15"),
             @ApiImplicitParam(name = "roomCode", value = "楼栋编码，查询条件"),
-            @ApiImplicitParam(name = "uid", value = "单元id，查询条件"),
-            @ApiImplicitParam(name = "fid", value = "楼栋id，查询条件"),
+            @ApiImplicitParam(name = "unitId", value = "单元id，查询条件"),
+            @ApiImplicitParam(name = "floorId", value = "楼栋id，查询条件"),
             @ApiImplicitParam(name = "cid", value = "小区id，查询条件"),
             @ApiImplicitParam(name = "name", value = "业主名，查询条件")
     })
-    @GetMapping("/rooms/page")
+    @PostMapping("/rooms/page")
     public Response<IPage<Room>> getRoomList(
             @RequestParam(required = false, defaultValue = "1") Integer current,
             @RequestParam(required = false, defaultValue = "15") Integer pageSize,
-            Integer roomCode, Integer uid, Integer fid, Integer cid, String name) {
+            Integer roomCode, Integer unitId, Integer floorId, Integer cid, String name) {
         Page<Room> page = new Page<>(current, pageSize);
         QueryWrapper<Room> qw = new QueryWrapper<>();
         qw.eq(roomCode != null, "room_code", roomCode);
-        qw.eq(uid != null, "uid", uid);
-        qw.eq(fid != null, "fid", fid);
+        qw.eq(unitId != null, "unit_id", unitId);
+        qw.eq(floorId != null, "floor_id", floorId);
         qw.eq(cid != null, "cid", cid);
         qw.eq(!StringUtils.isEmpty(name), "name", name);
         IPage<Room> p = roomService.page(page, qw);
@@ -64,10 +64,10 @@ public class RoomController {
     }
 
     @ApiOperation("获取房屋详情的接口")
-    @ApiImplicitParam(name = "rid", value = "房屋id", required = true)
-    @GetMapping("/rooms/{rid}")
-    public Response<Room> getRoom(@PathVariable(value = "rid") Integer rid) {
-        Room room = roomService.getById(rid);
+    @ApiImplicitParam(name = "roomId", value = "房屋id", required = true)
+    @PostMapping("/rooms/{roomId}")
+    public Response<Room> getRoom(@PathVariable(value = "roomId") Integer roomId) {
+        Room room = roomService.getById(roomId);
         return new Response<>(room);
     }
 
@@ -79,7 +79,7 @@ public class RoomController {
             if (room.getCid() == null || room.getFloorId() == null || room.getUnitId() == null || StringUtils.isEmpty(room.getRoomCode())) {
                 throw new ParamException(ErrorEnum.INCOMPLETE_PARAM);
             }
-            Room room1 = roomService.getOne(new QueryWrapper<Room>().eq("room_code", room.getRoomCode()).eq("uid", room.getUnitId()).eq("fid", room.getFloorId()).eq("cid", room.getCid()));
+            Room room1 = roomService.getOne(new QueryWrapper<Room>().eq("room_code", room.getRoomCode()).eq("unit_id", room.getUnitId()).eq("floor_id", room.getFloorId()).eq("cid", room.getCid()));
             if (room1 != null) {
                 throw new ParamException("103", "房屋编号已存在");
             }
@@ -87,34 +87,34 @@ public class RoomController {
         } else {
             if (!StringUtils.isEmpty(room.getRoomCode())) {
                 Room r = roomService.getById(room.getRoomId());
-                Room room1 = roomService.getOne(new QueryWrapper<Room>().eq("room_code", room.getRoomCode()).eq("uid", r.getUnitId()).eq("fid", r.getFloorId()).eq("cid", r.getCid()));
+                Room room1 = roomService.getOne(new QueryWrapper<Room>().eq("room_code", room.getRoomCode()).eq("unit_id", r.getUnitId()).eq("floor_id", r.getFloorId()).eq("cid", r.getCid()));
                 if (room1 != null) {
                     throw new ParamException("103", "房屋编号已存在");
                 }
             }
         }
         room.setUpdateTime(LocalDateTime.now());
-        if (!roomService.insertOrUpdate(room)) {
+        if (!roomService.saveOrUpdate(room)) {
             throw new CrudException("100", "添加或者删除失败");
         }
         return new Response();
     }
 
     @ApiOperation("删除房屋详情的接口")
-    @ApiImplicitParam(name = "rid", value = "房屋id", required = true)
-    @DeleteMapping("/rooms/{rid}")
-    public Response delete(@PathVariable Integer rid) {
-        if (!roomService.delete(rid)) {
-            throw new CrudException("103", rid + "删除失败");
+    @ApiImplicitParam(name = "roomId", value = "房屋id", required = true)
+    @DeleteMapping("/rooms/{roomId}")
+    public Response delete(@PathVariable Integer roomId) {
+        if (!roomService.removeById(roomId)) {
+            throw new CrudException("103", roomId + "删除失败");
         }
         return new Response();
     }
 
     @ApiOperation("批量删除房屋详情的接口")
-    @ApiImplicitParam(name = "rid", value = "房屋id数组", required = true)
+    @ApiImplicitParam(name = "roomId", value = "房屋id数组", required = true)
     @DeleteMapping("/rooms")
-    public Response batchDelete(@RequestParam Integer[] rid) {
-        if (!roomService.deleteByIds(Arrays.asList(rid))) {
+    public Response batchDelete(@RequestParam Integer[] roomId) {
+        if (!roomService.removeByIds(Arrays.asList(roomId))) {
             throw new CrudException("103", "批量删除失败");
         }
         return new Response();

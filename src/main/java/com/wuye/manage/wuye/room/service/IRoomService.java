@@ -1,10 +1,7 @@
 package com.wuye.manage.wuye.room.service;
 
-import com.wuye.manage.wuye.room.entity.Room;
 import com.baomidou.mybatisplus.extension.service.IService;
-
-import java.io.Serializable;
-import java.util.Collection;
+import com.wuye.manage.wuye.room.entity.Room;
 
 /**
  * <p>
@@ -16,9 +13,4 @@ import java.util.Collection;
  */
 public interface IRoomService extends IService<Room> {
 
-    public boolean insertOrUpdate(Room room);
-
-    public boolean delete(Serializable id);
-
-    public boolean deleteByIds(Collection<? extends Serializable> ids);
 }

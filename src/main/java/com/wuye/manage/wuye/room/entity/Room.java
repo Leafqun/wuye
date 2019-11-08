@@ -44,9 +44,6 @@ public class Room implements Serializable {
     @ApiModelProperty(value = "楼栋id")
     private Integer floorId;
 
-    @ApiModelProperty(value = "项目id")
-    private Integer prid;
-
     @ApiModelProperty(value = "小区id")
     private Integer cid;
 
@@ -72,7 +69,7 @@ public class Room implements Serializable {
     private BigDecimal unitPrice;
 
     @ApiModelProperty(value = "创建人")
-    private Integer cmid;
+    private Integer userId;
 
     @ApiModelProperty(value = "备注")
     private String remark;
