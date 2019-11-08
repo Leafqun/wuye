@@ -53,9 +53,6 @@ public class Room implements Serializable {
     @ApiModelProperty(value = "业主id")
     private Integer residentId;
 
-    @ApiModelProperty(value = "业主名称")
-    private String name;
-
     @ApiModelProperty(value = "室")
     private Integer section;
 

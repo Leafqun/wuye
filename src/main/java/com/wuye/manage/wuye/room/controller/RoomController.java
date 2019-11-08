@@ -9,11 +9,9 @@ import com.wuye.manage.wuye.enums.ErrorEnum;
 import com.wuye.manage.wuye.exception.CrudException;
 import com.wuye.manage.wuye.exception.ParamException;
 import com.wuye.manage.wuye.room.entity.Room;
+import com.wuye.manage.wuye.room.entity.RoomQueryVo;
 import com.wuye.manage.wuye.room.service.IRoomService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,18 +46,18 @@ public class RoomController {
             @ApiImplicitParam(name = "name", value = "业主名，查询条件")
     })
     @PostMapping("/rooms/page")
-    public Response<IPage<Room>> getRoomList(
+    public Response<IPage<RoomQueryVo>> getRoomList(
             @RequestParam(required = false, defaultValue = "1") Integer current,
             @RequestParam(required = false, defaultValue = "15") Integer pageSize,
-            Integer roomCode, Integer unitId, Integer floorId, Integer cid, String name) {
-        Page<Room> page = new Page<>(current, pageSize);
-        QueryWrapper<Room> qw = new QueryWrapper<>();
-        qw.eq(roomCode != null, "room_code", roomCode);
-        qw.eq(unitId != null, "unit_id", unitId);
-        qw.eq(floorId != null, "floor_id", floorId);
-        qw.eq(cid != null, "cid", cid);
-        qw.eq(!StringUtils.isEmpty(name), "name", name);
-        IPage<Room> p = roomService.page(page, qw);
+            Integer roomCode, Integer unitId, Integer floorId, @RequestParam Integer cid, String name) {
+        Page<RoomQueryVo> page = new Page<>(current, pageSize);
+        QueryWrapper<RoomQueryVo> qw = new QueryWrapper<>();
+        qw.eq(roomCode != null, "a.room_code", roomCode);
+        qw.eq(unitId != null, "a.unit_id", unitId);
+        qw.eq(floorId != null, "a.floor_id", floorId);
+        qw.eq("a.cid", cid);
+        qw.eq(!StringUtils.isEmpty(name), "d.name", name);
+        IPage<RoomQueryVo> p = roomService.getQueryPage(page, qw, cid);
         return new Response<>(p);
     }
 
@@ -102,7 +100,7 @@ public class RoomController {
 
     @ApiOperation("删除房屋详情的接口")
     @ApiImplicitParam(name = "roomId", value = "房屋id", required = true)
-    @DeleteMapping("/rooms/{roomId}")
+    @PostMapping("/rooms/delete/{roomId}")
     public Response delete(@PathVariable Integer roomId) {
         if (!roomService.removeById(roomId)) {
             throw new CrudException("103", roomId + "删除失败");
@@ -112,7 +110,7 @@ public class RoomController {
 
     @ApiOperation("批量删除房屋详情的接口")
     @ApiImplicitParam(name = "roomId", value = "房屋id数组", required = true)
-    @DeleteMapping("/rooms")
+    @PostMapping("/rooms/delete")
     public Response batchDelete(@RequestParam Integer[] roomId) {
         if (!roomService.removeByIds(Arrays.asList(roomId))) {
             throw new CrudException("103", "批量删除失败");

@@ -37,17 +37,20 @@ public class CommunityController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "current", value = "当前页，默认为1"),
             @ApiImplicitParam(name = "pageSize", value = "分页大小，默认为15"),
+            @ApiImplicitParam(name = "type", value = "类型, 1为小区，2为代理"),
             @ApiImplicitParam(name = "name", value = "小区名，查询条件"),
             @ApiImplicitParam(name = "address", value = "小区地址，查询条件，支持模糊查询"),
     })
-    @GetMapping("/communities/page")
+    @PostMapping("/communities/page")
     public Response<IPage<Community>> getFloorList(
             @RequestParam(required = false, defaultValue = "1") Integer current,
             @RequestParam(required = false, defaultValue = "15") Integer pageSize,
+            @RequestParam String type,
             String name,
             String address) {
         Page<Community> page = new Page<>(current, pageSize);
         QueryWrapper<Community> qw = new QueryWrapper<>();
+        qw.eq("type", type);
         qw.eq(!StringUtils.isEmpty(name), "name", name);
         qw.like(!StringUtils.isEmpty(address), "address", address);
         IPage<Community> p = communityService.page(page, qw);
@@ -56,7 +59,7 @@ public class CommunityController {
 
     @ApiOperation("获取小区详情的接口")
     @ApiImplicitParam(name = "cid", value = "小区id", required = true)
-    @GetMapping("/communities/{cid}")
+    @PostMapping("/communities/{cid}")
     public Response<Community> getFloor(@PathVariable Integer cid) {
         Community community = communityService.getById(cid);
         return new Response<>(community);
@@ -72,13 +75,4 @@ public class CommunityController {
         return new Response();
     }
 
-    @ApiOperation("删除小区的接口")
-    @ApiImplicitParam(name = "cid", value = "小区id", required = true)
-    @DeleteMapping("/communities/{cid}")
-    public Response delete(@PathVariable Integer cid) {
-        if (!communityService.removeById(cid)) {
-            throw new CrudException("104", cid + "小区删除失败");
-        }
-        return new Response();
-    }
 }

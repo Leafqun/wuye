@@ -2,6 +2,7 @@ package com.wuye.manage.wuye.community.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -21,7 +22,8 @@ import java.io.Serializable;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@ApiModel(value="Community对象", description="小区表")
+@ApiModel(value="Community对象", description="小区或者代理表")
+@TableName("t_community")
 public class Community implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -43,7 +45,7 @@ public class Community implements Serializable {
     private String landmark;
 
     @ApiModelProperty(value = "城市编码")
-    private String code;
+    private String cityCode;
 
     @ApiModelProperty(value = "纬度")
     private Double lat;
@@ -53,5 +55,11 @@ public class Community implements Serializable {
 
     @ApiModelProperty(value = "状态, 0未入驻和审核1审核中2审核失败3入驻成功")
     private String status;
+
+    @ApiModelProperty(value = "类型, 1为小区，2为代理")
+    private String type;
+
+    @ApiModelProperty(value = "组id")
+    private String groupId;
 
 }
