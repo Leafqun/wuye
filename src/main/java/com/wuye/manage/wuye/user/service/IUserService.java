@@ -1,7 +1,10 @@
 package com.wuye.manage.wuye.user.service;
 
-import com.wuye.manage.wuye.user.entity.User;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wuye.manage.wuye.user.entity.User;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IUserService extends IService<User> {
 
+    public IPage<User> getPage(Page<User> page, QueryWrapper<User> qw, String cid);
 }

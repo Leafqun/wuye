@@ -49,5 +49,9 @@ public class User implements Serializable {
     @ApiModelProperty(value = "组织标签")
     private String tag;
 
+    @ApiModelProperty(value = "性别")
+    private String gender;
 
+    @ApiModelProperty(value = "地址")
+    private String address;
 }
