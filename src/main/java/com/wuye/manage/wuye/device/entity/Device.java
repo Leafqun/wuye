@@ -3,6 +3,7 @@ package com.wuye.manage.wuye.device.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -65,5 +66,7 @@ public class Device implements Serializable {
     @ApiModelProperty(value = "防拆开关")
     private String devSwitch;
 
-
+    @ApiModelProperty(value = "创建时间")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
+    private String createTime;
 }
