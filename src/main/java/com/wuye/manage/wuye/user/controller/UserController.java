@@ -4,16 +4,17 @@ package com.wuye.manage.wuye.user.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.wuye.manage.wuye.config.ApiVersion;
-import com.wuye.manage.wuye.dto.Response;
-import com.wuye.manage.wuye.exception.CrudException;
-import com.wuye.manage.wuye.exception.ParamException;
+import com.wuye.manage.config.ApiVersion;
+import com.wuye.manage.dto.Response;
+import com.wuye.manage.exception.CrudException;
+import com.wuye.manage.exception.ParamException;
 import com.wuye.manage.wuye.user.entity.User;
 import com.wuye.manage.wuye.user.service.IUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -30,6 +31,7 @@ import javax.annotation.Resource;
 @RequestMapping("/api/{version}")
 @Api(tags = "用户管理相关接口")
 @ApiVersion(1)
+@Slf4j
 public class UserController {
 
     @Resource
@@ -80,12 +82,35 @@ public class UserController {
         return new Response<>(user);
     }
 
-    @ApiOperation("删除用户的接口")
+    @ApiOperation("更改用户详情的接口")
     @ApiImplicitParam(name = "userId", value = "用户id", required = true)
-    @PostMapping("/users/delete/{userId}")
-    public Response<User> deleteUser(@PathVariable Integer userId) {
-        if (!userService.removeById(userId)) {
-            throw new CrudException("103", userId + "删除失败");
+    @PostMapping("/users/update")
+    public Response updateUser(@RequestParam Integer userId, User user) {
+        if (!userService.updateById(user)) {
+            throw new CrudException("103", "更改失败");
+        }
+        return new Response<>();
+    }
+
+    @ApiOperation("新增用户详情的接口")
+    @ApiImplicitParam(name = "cid", value = "小区或者代理id", required = true)
+    @PostMapping("/users/insert")
+    public Response insertUser(@RequestParam Integer cid, User user) {
+        if (!userService.insert(user, cid)) {
+            throw new CrudException("103", "用户新增失败");
+        }
+        return new Response<>();
+    }
+
+    @ApiOperation("删除某个小区或者代理的用户的接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId", value = "用户id", required = true),
+            @ApiImplicitParam(name = "cid", value = "小区或者代理id", required = true)
+    })
+    @PostMapping("/users/delete/{cid}/{userId}")
+    public Response<User> deleteUser(@PathVariable Integer cid, @PathVariable Integer userId) {
+        if (!userService.delete(userId, cid)) {
+            throw new CrudException("103", "删除失败");
         }
         return new Response<>();
     }

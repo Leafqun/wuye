@@ -17,4 +17,8 @@ import com.wuye.manage.wuye.user.entity.User;
 public interface IUserService extends IService<User> {
 
     public IPage<User> getPage(Page<User> page, QueryWrapper<User> qw, String cid);
+
+    public boolean insert(User user, Integer cid);
+
+    public boolean delete(Integer userId, Integer cid);
 }
